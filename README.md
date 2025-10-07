@@ -1,1 +1,221 @@
-# CUSTOMER-DATA-ENTRY
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZenFix Customer Service Entry</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(145deg, #000000, #1c1c1c);
+      color: #fff;
+      font-family: "Poppins", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+    }
+    h1 {
+      color: gold;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    }
+    .form-container {
+      background: #121212;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 12px;
+    }
+    input, select, textarea {
+      background: #1f1f1f;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 15px;
+      transition: 0.3s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: gold;
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    }
+    button {
+      background: gold;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #ffcc00;
+      transform: scale(1.03);
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      max-width: 900px;
+      border-collapse: collapse;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 50px;
+    }
+    thead {
+      background: #222;
+      color: gold;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+    }
+    tr:hover {
+      background: rgba(255, 215, 0, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>ZenFix Service Entry</h1>
+
+  <div class="form-container">
+    <form id="entryForm">
+      <input type="text" id="name" placeholder="Customer Name" required>
+      <input type="text" id="phone" placeholder="Phone Number" required>
+      <input type="text" id="Alternate Phone" placeholder="Alternate Number" required>
+      <input type="text" id="address" placeholder="Address" required>
+      <input type="text" id="model" placeholder="Mobile Model" required>
+      <input type="text" id="Conditions" placeholder="Device condition" required>
+      <select id="serviceType" required>
+        <option value="">Select Service Type</option>
+        <option value="DISPLAY">DISPLAY</option>
+        <option value="BATTERY">BATTERY</option>
+        <option value="FRONT GLASS">FRONT GLASS</option>
+        <option value="BACK GLASS">BACK GLASS</option>
+        <option value="Speaker">SPEAKER</option>
+        <option value="OUTER KEYS">OUTER KEYS</option>
+        <option value="CHARGING PIN">CHARGING PIN</option>
+        <option value="IC WORK">IC WORK</option>
+        <option value="MOTHER BOARD">MOTHER BOARD</option>
+      </select>
+      <textarea id="issue" placeholder="Issue Description" rows="2" required></textarea>
+      <textarea id="comments" placeholder="Additional Comments(ex.warranty)" rows="2"></textarea>
+      <textarea id="Estimation" placeholder="Estimation Amount"></textarea>
+      <div class="btn-group">
+        <button type="submit">Add Entry</button>
+        <button type="button" id="exportExcel">Export Excel</button>
+              </div>
+    </form>
+  </div>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Date & Time</th>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Model</th>
+        <th>Service Type</th>
+        <th>Issue</th>
+        <th>Comments</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    let entries = [];
+
+    // Load saved entries
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('zenfix_entries');
+      if (saved) {
+        entries = JSON.parse(saved);
+        refreshTable();
+      }
+    });
+
+    // Save to localStorage
+    function saveLocal() {
+      localStorage.setItem('zenfix_entries', JSON.stringify(entries));
+    }
+
+    // Refresh table
+    function refreshTable() {
+      const tbody = document.querySelector('#dataTable tbody');
+      tbody.innerHTML = '';
+      entries.forEach(e => {
+        const row = `<tr>
+          <td>${e.dateTime}</td>
+          <td>${e.name}</td>
+          <td>${e.phone}</td>
+          <td>${e.model}</td>
+          <td>${e.serviceType}</td>
+          <td>${e.issue}</td>
+          <td>${e.comments}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    // Add entry
+    document.getElementById('entryForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const entry = {
+        dateTime: new Date().toLocaleString(),
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        model: document.getElementById('model').value,
+        serviceType: document.getElementById('serviceType').value,
+        issue: document.getElementById('issue').value,
+        comments: document.getElementById('comments').value
+      };
+      entries.push(entry);
+      saveLocal();
+      refreshTable();
+      e.target.reset();
+    });
+
+    // Export to Excel
+    document.getElementById('exportExcel').addEventListener('click', () => {
+      const ws = XLSX.utils.json_to_sheet(entries);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'ZenFix Entries');
+      XLSX.writeFile(wb, 'ZenFix_Customer_Entries.xlsx');
+    });
+
+    // Clear all entries
+    document.getElementById('clearAll').addEventListener('click', () => {
+      if (confirm("Are you sure you want to delete all saved entries?")) {
+        entries = [];
+        saveLocal();
+        refreshTable();
+      }
+    });
+  </script>
+</body>
+</html>
